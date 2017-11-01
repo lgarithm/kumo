@@ -1,0 +1,6 @@
+/bin
+*.hi
+*.o
+*.out
+.vscode
+main
