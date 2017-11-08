@@ -2,14 +2,21 @@ module Kumo.Actor.Examples.PingPong where
 
 import           Control.Concurrent       (threadDelay)
 import           Control.Concurrent.Async (async)
-import           Kumo.Actor               (Behavior, Context (..), host, remote,
-                                           send, spawn, spawnRemote)
+import qualified Data.ByteString.Char8    as C8 (pack, unpack)
+import           Kumo.Actor               (Behavior, Context (..),
+                                           Serializable (deserialize, serialize),
+                                           host, remote, send, spawn,
+                                           spawnRemote)
 import           Network.Wai              (Application)
 import           Network.Wai.Handler.Warp (run)
 import           System.Environment       (getArgs)
 import           Text.Printf              (printf)
 
 data Msg = Ping Int | Pong Int deriving (Show, Read)
+
+instance Serializable Msg where
+    serialize = C8.pack . show
+    deserialize = Just . read . C8.unpack
 
 newtype Node = Node { _name :: String }
 

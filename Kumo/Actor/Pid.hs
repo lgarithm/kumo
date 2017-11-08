@@ -7,14 +7,21 @@ module Kumo.Actor.Pid
     , send
     , tell
     , hdrSender
+    , Serializable(deserialize, serialize)
     ) where
 
 import           Control.Concurrent.STM       (atomically)
 import           Control.Concurrent.STM.TChan (TChan, writeTChan)
 import           Control.Exception            (SomeException (..), catch)
-import           Network.HTTP                 (insertHeader,
-                                               postRequestWithBody, simpleHTTP)
-import           Network.HTTP.Headers         (HeaderName (HdrCustom))
+import           Control.Monad                (void)
+import           Data.ByteString              (ByteString, length)
+import           Network.HTTP                 (HeaderName (HdrContentLength, HdrContentType, HdrCustom),
+                                               Request (Request),
+                                               RequestMethod (POST), mkHeader,
+                                               simpleHTTP)
+import           Network.URI                  (parseURI)
+import           Prelude                      hiding (length)
+
 
 -- a Pid is a handle that you can send message to
 data Pid m = Remote { _kind     :: String
@@ -37,24 +44,31 @@ instance Show (Pid m) where
 
 hdrSender = "X-Kumo-Actor-Sender"
 
-sendRemote :: (Show m) => Pid m -> String -> m -> IO ()
-sendRemote sender ep msg = do
-    let req = insertHeader (HdrCustom hdrSender) (show sender) $
-              postRequestWithBody ep "text/plain" (show msg)
-    simpleHTTP req
-    return ()
+class Serializable m where
+  serialize :: m -> ByteString
+  deserialize :: ByteString -> Maybe m
 
-send :: (Show m) => Pid m -> Pid m -> m -> IO ()
+sendRemote :: (Serializable m) => Pid m -> String -> m -> IO ()
+sendRemote sender url msg =
+  case parseURI url of
+    Nothing -> print $ "Not a valid URL - " ++ url
+    Just u  -> let body = serialize msg
+                   headers = [ mkHeader (HdrCustom hdrSender) (show sender)
+                             , mkHeader HdrContentType "application/octet-stream"
+                             , mkHeader HdrContentLength (show $ length body)
+                             ]
+               in  void $ simpleHTTP $ Request u POST headers body
+
+send :: (Serializable m) => Pid m -> Pid m -> m -> IO ()
 send sender pid msg =
     case pid of
         Nobody        -> return ()
         Local ch      -> atomically $ writeTChan ch (sender, msg)
         Remote _ _ ep -> catch (sendRemote sender ep msg) pErr
 
-tell :: (Show a) => Pid a -> a -> IO ()
+tell :: (Serializable a) => Pid a -> a -> IO ()
 tell = send {-- from --} Nobody
 
 pErr :: SomeException -> IO ()
 pErr e = let err = show (e :: SomeException)
          in  print $ "exception " ++ err
-
