@@ -3,10 +3,16 @@ module Kumo.Actor.Examples.PingPong where
 import           Control.Concurrent       (threadDelay)
 import           Control.Concurrent.Async (async)
 import qualified Data.ByteString.Char8    as C8 (pack, unpack)
-import           Kumo.Actor               (Behavior, Context (..),
-                                           Serializable (deserialize, serialize),
-                                           host, remote, send, spawn,
-                                           spawnRemote)
+import           Kumo.Actor
+    ( Behavior
+    , Context (..)
+    , Serializable (deserialize, serialize)
+    , host
+    , remote
+    , send
+    , spawn
+    , spawnRemote
+    )
 import           Network.Wai              (Application)
 import           Network.Wai.Handler.Warp (run)
 import           System.Environment       (getArgs)

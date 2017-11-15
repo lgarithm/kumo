@@ -9,14 +9,24 @@ import qualified Data.ByteString.Lazy  as LBS (toStrict)
 import qualified Data.CaseInsensitive  as CI (mk)
 import           Data.List.Split       (splitOn)
 import           Data.Maybe            (fromMaybe)
-import           Kumo.Actor.Pid        (Pid (Nobody),
-                                        Serializable (deserialize), hdrSender,
-                                        remote, send)
+import           Kumo.Actor.Pid
+    ( Pid (Nobody)
+    , Serializable (deserialize)
+    , hdrSender
+    , remote
+    , send
+    )
 import           Network.HTTP.Types    (status200)
 import           Network.URI           (parseURI)
-import           Network.Wai           (Request, Response, rawPathInfo,
-                                        requestHeaders, requestMethod,
-                                        responseLBS, strictRequestBody)
+import           Network.Wai
+    ( Request
+    , Response
+    , rawPathInfo
+    , requestHeaders
+    , requestMethod
+    , responseLBS
+    , strictRequestBody
+    )
 
 type Responder a = (Response -> IO a) -> IO a
 type Handler a = Request -> Responder a

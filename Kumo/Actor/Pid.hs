@@ -15,10 +15,13 @@ import           Control.Concurrent.STM.TChan (TChan, writeTChan)
 import           Control.Exception            (SomeException (..), catch)
 import           Control.Monad                (void)
 import           Data.ByteString              (ByteString, length)
-import           Network.HTTP                 (HeaderName (HdrContentLength, HdrContentType, HdrCustom),
-                                               Request (Request),
-                                               RequestMethod (POST), mkHeader,
-                                               simpleHTTP)
+import           Network.HTTP
+    ( HeaderName (HdrContentLength, HdrContentType, HdrCustom)
+    , Request (Request)
+    , RequestMethod (POST)
+    , mkHeader
+    , simpleHTTP
+    )
 import           Network.URI                  (parseURI)
 import           Prelude                      hiding (length)
 
