@@ -5,6 +5,7 @@ module Kumo.Actor.Remote where
 
 
 import qualified Data.ByteString.Char8 as C8 (pack, unpack)
+import qualified Data.ByteString.Lazy  as LBS (toStrict)
 import qualified Data.CaseInsensitive  as CI (mk)
 import           Data.List.Split       (splitOn)
 import           Data.Maybe            (fromMaybe)
@@ -14,8 +15,8 @@ import           Kumo.Actor.Pid        (Pid (Nobody),
 import           Network.HTTP.Types    (status200)
 import           Network.URI           (parseURI)
 import           Network.Wai           (Request, Response, rawPathInfo,
-                                        requestBody, requestHeaders,
-                                        requestMethod, responseLBS)
+                                        requestHeaders, requestMethod,
+                                        responseLBS, strictRequestBody)
 
 type Responder a = (Response -> IO a) -> IO a
 type Handler a = Request -> Responder a
@@ -28,7 +29,7 @@ host pid req respond =
         sender = parseSender req
     in  case (method, parts) of
         ("POST", _) -> do
-            body <- requestBody req
+            body <- fmap LBS.toStrict (strictRequestBody req)
             let result = deserialize body :: Maybe m
             case result of
                 Just msg -> send sender pid msg >> respond (okWithText "received")
