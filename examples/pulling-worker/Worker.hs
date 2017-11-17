@@ -16,7 +16,7 @@ import           Kumo.Actor
     )
 import           Model                    (Msg (..), Result (Result), Task (..))
 import           Text.Printf              (printf)
-import           Utils                    (runWebApp)
+import           Utils                    (logRaw, runWebApp)
 
 data Worker = Worker { master :: Pid Msg
                      , mutex  :: MVar ()
@@ -26,7 +26,7 @@ work :: Task -> IO Result
 work task = do
     sleep 3
     let tid = _id task
-    print tid
+    logRaw tid
     return $ Result tid ""
 
 tryWithMVar :: MVar a -> b -> (a -> IO b) -> IO b
@@ -34,7 +34,7 @@ tryWithMVar mv zero f = do
     mx <- tryTakeMVar mv
     case mx of
         Nothing -> do
-            print "give up"
+            logRaw "give up"
             return zero
         Just x  -> do
             y <- f x
@@ -46,16 +46,16 @@ receive (Context self sender) worker msg =
     case msg of
         Ready -> do
             send self (master worker) Apply
-            print "applied"
+            logRaw "applied"
         Assign task -> void $ async $ do
-            print "task assigned"
+            logRaw "task assigned"
             -- result <- withMVar (mutex worker) $ const (work task)
             mResult <- tryWithMVar (mutex worker) Nothing $ const (fmap Just (work task))
             case mResult of
                 Just result -> do
-                    print "task done"
+                    logRaw "task done"
                     send self sender (Submit result)
-                    print "result submitted"
+                    logRaw "result submitted"
                     tell self Ready
                 Nothing -> return ()
         _           -> return ()
@@ -65,7 +65,7 @@ runWorker = do
     let port = 3001
     let master = "http://master:3000/"
     let ep = printf "http://worker:%d/" port
-    print ep
+    logRaw ep
     mutex <- newMVar ()
     let worker = Worker (remote master) mutex
     pid <- spawnRemote ep receive worker

@@ -10,7 +10,7 @@ import           Kumo.Actor
     , spawnRemote
     )
 import           Model                   (Msg (..), Result (..), Task (..))
-import           Utils                   (runWebApp)
+import           Utils                   (logRaw, runWebApp)
 
 data Master = Master { _id     :: String
                      , counter :: MVar Int
@@ -26,26 +26,26 @@ updateMvar mv f = do
 allocate :: Master -> IO (Maybe Task)
 allocate master = do
     n <- updateMvar (counter master) (+1)
-    print $ "allocate " ++ show n
+    logRaw $ "allocate " ++ show n
     return $ Just $ Task (show n) ("task-" ++ show n)
 
 receive :: Behavior Msg Master
 receive (Context self sender) master msg =
     case msg of
     Apply         -> do
-        print $ show sender ++ " applied"
+        logRaw $ show sender ++ " applied"
         replicateM_ 3 $ do
             mTask <- allocate master
             case mTask of
                 Just task -> send self sender (Assign task)
                 Nothing   -> return ()
-    Submit result -> print $ "submitted " ++ taskID result
+    Submit result -> logRaw $ "submitted " ++ taskID result
     _             -> return ()
 
 
 runMaster = do
     let ep = "http://master:3000/"
-    print ep
+    logRaw ep
     counter <- newMVar 0
     let master = Master "master0" counter
     pid <- spawnRemote ep receive master
