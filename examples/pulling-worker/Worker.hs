@@ -1,9 +1,19 @@
+module Worker where
+
 import           Control.Concurrent       (threadDelay)
-import           Control.Concurrent.Async (async, wait)
+import           Control.Concurrent.Async (async)
 import           Control.Concurrent.MVar  (MVar, newMVar, putMVar, tryTakeMVar)
 import           Control.Monad            (void)
-import           Kumo.Actor               (Behavior, Context (..), Pid, host,
-                                           remote, send, spawnRemote, tell)
+import           Kumo.Actor
+    ( Behavior
+    , Context (..)
+    , Pid
+    , host
+    , remote
+    , send
+    , spawnRemote
+    , tell
+    )
 import           Model                    (Msg (..), Result (Result), Task (..))
 import           Text.Printf              (printf)
 import           Utils                    (runWebApp)
@@ -51,15 +61,15 @@ receive (Context self sender) worker msg =
         _           -> return ()
 
 
-main = do
+runWorker = do
     let port = 3001
-    let master = "http://127.0.0.1:3000/"
-    let ep = printf "http://127.0.0.1:%d/" port
+    let master = "http://master:3000/"
+    let ep = printf "http://worker:%d/" port
+    print ep
     mutex <- newMVar ()
     let worker = Worker (remote master) mutex
     pid <- spawnRemote ep receive worker
-    th <- async $ runWebApp port (host pid)
-    tell pid Ready
-    wait th
+    async $ tell pid Ready
+    runWebApp port (host pid)
 
 sleep n = threadDelay $ n * 1000000

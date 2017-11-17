@@ -1,7 +1,14 @@
+module Master where
+
 import           Control.Concurrent.MVar (MVar, newMVar, putMVar, takeMVar)
 import           Control.Monad           (replicateM_)
-import           Kumo.Actor              (Behavior, Context (..), host, send,
-                                          spawnRemote)
+import           Kumo.Actor
+    ( Behavior
+    , Context (..)
+    , host
+    , send
+    , spawnRemote
+    )
 import           Model                   (Msg (..), Result (..), Task (..))
 import           Utils                   (runWebApp)
 
@@ -24,7 +31,7 @@ allocate master = do
 
 receive :: Behavior Msg Master
 receive (Context self sender) master msg =
-  case msg of
+    case msg of
     Apply         -> do
         print $ show sender ++ " applied"
         replicateM_ 3 $ do
@@ -36,8 +43,9 @@ receive (Context self sender) master msg =
     _             -> return ()
 
 
-main = do
-    let ep = "http://127.0.0.1:3000/"
+runMaster = do
+    let ep = "http://master:3000/"
+    print ep
     counter <- newMVar 0
     let master = Master "master0" counter
     pid <- spawnRemote ep receive master

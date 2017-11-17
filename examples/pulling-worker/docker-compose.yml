@@ -1,0 +1,11 @@
+# https://docs.docker.com/compose/compose-file/
+version: '2'
+services:
+  master:
+    image: kumo-example
+    command: 
+    - master
+  worker:
+    image: kumo-example
+    command: 
+    - worker
