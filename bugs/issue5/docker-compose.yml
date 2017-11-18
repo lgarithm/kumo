@@ -1,0 +1,13 @@
+# https://docs.docker.com/compose/compose-file/
+---
+version: '3'
+services:
+  normal:
+    image: kumo-debug-issue5:latest
+  traced:
+    image: kumo-debug-issue5:latest
+    cap_add:
+    - SYS_PTRACE
+    entrypoint: strace
+    command:
+    - /haskell/src/debug
