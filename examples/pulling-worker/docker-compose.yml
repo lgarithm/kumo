@@ -3,9 +3,17 @@ version: '2'
 services:
   master:
     image: kumo-example
+    entrypoint: strace
     command: 
+    - /haskell/src/main
     - master
+    cap_add:
+      - SYS_PTRACE
   worker:
     image: kumo-example
+    entrypoint: strace
     command: 
+    - /haskell/src/main
     - worker
+    cap_add:
+      - SYS_PTRACE

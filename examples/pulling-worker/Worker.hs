@@ -45,6 +45,7 @@ receive :: Behavior Msg Worker
 receive (Context self sender) worker msg =
     case msg of
         Ready -> do
+            logRaw "ready"
             send self (master worker) Apply
             logRaw "applied"
         Assign task -> void $ async $ do
@@ -69,7 +70,7 @@ runWorker = do
     mutex <- newMVar ()
     let worker = Worker (remote master) mutex
     pid <- spawnRemote ep receive worker
-    async $ tell pid Ready
+    async $ tell pid Ready >> logRaw "told"
     runWebApp port (host pid)
 
 sleep n = threadDelay $ n * 1000000

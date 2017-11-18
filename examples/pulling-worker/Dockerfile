@@ -6,6 +6,7 @@ RUN apt update && \
     apt install -y curl make haskell-platform && \
     cabal update && \
     cabal install http wai warp split utf8-string
+RUN apt install -y strace man
 ADD Kumo /haskell/src/Kumo
 ADD *.hs /haskell/src/
 ADD Makefile /haskell/src/
