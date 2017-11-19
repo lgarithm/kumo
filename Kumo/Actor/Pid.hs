@@ -12,9 +12,9 @@ module Kumo.Actor.Pid
 
 import           Control.Concurrent.STM       (atomically)
 import           Control.Concurrent.STM.TChan (TChan, writeTChan)
-import           Control.Exception            (SomeException (..), catch)
 import           Control.Monad                (void)
 import           Data.ByteString              (ByteString, length)
+import           Kumo.Actor.Exception         (logException)
 import           Network.HTTP
     ( HeaderName (HdrContentLength, HdrContentType, HdrCustom)
     , Request (Request)
@@ -67,11 +67,7 @@ send sender pid msg =
     case pid of
         Nobody        -> return ()
         Local ch      -> atomically $ writeTChan ch (sender, msg)
-        Remote _ _ ep -> catch (sendRemote sender ep msg) pErr
+        Remote _ _ ep -> logException (sendRemote sender ep msg)
 
 tell :: (Serializable a) => Pid a -> a -> IO ()
 tell = send {-- from --} Nobody
-
-pErr :: SomeException -> IO ()
-pErr e = let err = show (e :: SomeException)
-         in  print $ "exception " ++ err

@@ -9,6 +9,7 @@ import           Control.Concurrent.Async     (async)
 import           Control.Concurrent.STM       (atomically)
 import           Control.Concurrent.STM.TChan (newTChanIO, readTChan)
 import           Control.Monad                (forever)
+import           Kumo.Actor.Exception         (logException)
 import           Kumo.Actor.Pid               (Pid, local, remote)
 
 data Context m = Context { self   :: Pid m
@@ -30,6 +31,6 @@ spawnRemote ep receive state = do
     forwarding mailbox (remote ep) receive state
     return $ local mailbox
 
-forwarding mailbox self receive state = async $ forever $ do
+forwarding mailbox self receive state = async $ forever $ logException $ do
     (sender, msg) <- atomically (readTChan mailbox)
     receive (Context self sender) state msg
