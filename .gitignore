@@ -1,7 +1,9 @@
 *.hi
 *.o
 *.out
+*_hi
+*_o
+.stack-work
 .vscode
 /bin
 /dist
-main

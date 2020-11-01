@@ -1,0 +1,59 @@
+name:                kumo
+version:             0.1.0.0
+github:              "lgarithm/kumo"
+license:             BSD3
+author:              "Author name here"
+maintainer:          "example@example.com"
+copyright:           "2020 Author name here"
+
+extra-source-files: []
+
+description:         Please see the README on GitHub at <https://github.com/lgarithm/kumo>
+
+dependencies:
+- async
+- base >= 4.7 && < 5
+- bytestring
+- case-insensitive
+- HTTP
+- http-types
+- network-simple
+- network-uri
+- split
+- stm
+- wai
+- warp
+
+library:
+  source-dirs: src
+
+executables:
+  kumo-local:
+    main:                local.hs
+    source-dirs:         examples
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    dependencies:
+    - kumo
+
+  kumo-remote:
+    main:                remote.hs
+    source-dirs:         examples
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    dependencies:
+    - kumo
+
+  kumo-remote-channel:
+    main:                remote-channel.hs
+    source-dirs:         examples
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    dependencies:
+    - kumo

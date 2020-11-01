@@ -1,0 +1,6 @@
+local-bin-path: bin
+
+resolver: lts-16.18
+
+packages:
+- .

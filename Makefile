@@ -1,3 +1,7 @@
-all:
-	make -C examples/local
-	make -C examples/remote
+build:
+	stack build
+
+install:
+	stack install
+
+i: install
