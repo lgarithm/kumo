@@ -1,5 +1,0 @@
-language: haskell
-install:
-  - cabal install http wai warp split utf8-string
-script:
-  - make
